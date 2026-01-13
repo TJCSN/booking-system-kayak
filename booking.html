@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Equipment Booking Calendar</title>
+   
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 10px;
+            font-size: 18px;
+        }
+ 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f0f0f0;
+            padding: 15px;
+        }
+ 
+        .year-badge {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+ 
+        .year-badge span {
+            display: inline-block;
+            background-color: #FF6B4A;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            box-shadow: 0 4px 10px rgba(255, 107, 74, 0.3);
+        }
+ 
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+ 
+        .controls h2 {
+            color: #333;
+            font-size: 22px;
+            text-align: center;
+            flex: 1;
+        }
+ 
+        .controls button {
+            padding: 15px 20px;
+            background-color: #7B68EE;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 100px;
+            box-shadow: 0 3px 8px rgba(123, 104, 238, 0.3);
+            transition: all 0.3s;
+        }
+ 
+        .controls button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(123, 104, 238, 0.3);
+        }
+ 
+        .equipment-selector {
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .equipment-selector label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 20px;
+        }
+ 
+        .equipment-selector select {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: white;
+        }
+ 
+        .calendar-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+ 
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+ 
+        .calendar thead th {
+            background-color: #A8D5E2;
+            color: #333;
+            padding: 12px 5px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #333;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+ 
+        .calendar tbody td {
+            border: 2px solid #333;
+            min-height: 100px;
+            height: 100px;
+            vertical-align: top;
+            padding: 5px;
+            position: relative;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            touch-action: manipulation;
+        }
+ 
+        .calendar tbody td:active {
+            background-color: #e8f4f8;
+        }
+ 
+        .calendar tbody td.empty {
+            background-color: #f5f5f5;
+            cursor: default;
+        }
+ 
+        .calendar tbody td.empty:active {
+            background-color: #f5f5f5;
+        }
+ 
+        .day-number {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+ 
+        .booking-count {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #FF6B4A;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(255, 107, 74, 0.4);
+        }
+ 
+        .booking-overview {
+            position: absolute;
+            bottom: 25px;
+            left: 5px;
+            right: 5px;
+            font-size: 9px;
+            line-height: 1.2;
+        }
+ 
+        .equipment-badge {
+            display: inline-block;
+            padding: 3px 5px;
+            margin: 1px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+ 
+        .eq-oc1 {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+ 
+        .eq-t {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+ 
+        .eq-k {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+ 
+        .availability-bar {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+ 
+        .availability-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+ 
+        .avail-low {
+            background-color: #4CAF50;
+        }
+ 
+        .avail-medium {
+            background-color: #FFC107;
+        }
+ 
+        .avail-high {
+            background-color: #F44336;
+        }
+ 
+        .tap-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7B68EE;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+ 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+ 
+        .modal-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+ 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+ 
+        .modal-header h2 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+ 
+        .close {
+            font-size: 40px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+ 
+        .close:active {
+            background-color: #f0f0f0;
+        }
+ 
+        .modal-date {
+            font-size: 20px;
+            color: #7B68EE;
+            margin-bottom: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+ 
+        .form-group {
+            margin-bottom: 25px;
+        }
+ 
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            font-size: 20px;
+        }
+ 
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 18px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            background-color: white;
+        }
+ 
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #7B68EE;
+            box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.1);
+        }
+ 
+        .time-slots {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+ 
+        .time-slot {
+            padding: 20px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: white;
+            touch-action: manipulation;
+        }
+ 
+        .time-slot:active:not(.booked) {
+            transform: scale(0.98);
+        }
+ 
+        .time-slot.selected {
+            background-color: #7B68EE;
+            color: white;
+            border-color: #7B68EE;
+            box-shadow: 0 4px 12px rgba(123, 104, 238, 0.4);
+        }
+ 
+        .time-slot.booked {
+            background-color: #f8d7da;
+            color: #721c24;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+ 
+        .time-slot.booked::after {
+            content: ' ❌ TAKEN';
+            font-size: 14px;
+            display: block;
+            margin-top: 5px;
+        }
+ 
+        .form-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+ 
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+ 
+        .btn:active {
+            transform: scale(0.98);
+        }
+ 
+        .btn-primary {
+            background-color: #7B68EE;
+            color: white;
+            box-shadow: 0 4px 12px rgba(123, 104, 238, 0.3);
+        }
+ 
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+ 
+        .legend {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 20px;
+        }
+ 
+        .legend-items {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+ 
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+ 
+        .legend-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+ 
+        .help-text {
+            background-color: #E3F2FD;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1976D2;
+        }
+ 
+        @media (min-width: 768px) {
+            .calendar thead th {
+                font-size: 16px;
+                padding: 15px;
+            }
+ 
+            .calendar tbody td {
+                height: 120px;
+            }
+ 
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+ 
+            .form-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+ 
+            .legend-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+ 
+        @media (min-width: 1024px) {
+            .time-slots {
+                grid-template-columns: repeat(3, 1fr);
+            }
+ 
+            .legend-items {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="year-badge">
+            <span>2026</span>
+        </div>
+ 
+        <div class="help-text">
+            🚣 <strong>How to use:</strong> Tap any date to see available time slots and make a booking. Green means available, red means busy. <strong>Only registered members can book equipment.</strong>
+        </div>
+ 
+        <div class="controls">
+            <button id="prevMonth" aria-label="Previous month">← Prev</button>
+            <h2 id="currentMonth">January 2026</h2>
+            <button id="nextMonth" aria-label="Next month">Next →</button>
+        </div>
+ 
+        <div class="equipment-selector">
+            <label for="equipmentSelect">🚣 Filter by Equipment:</label>
+            <select id="equipmentSelect" aria-label="Select equipment to filter">
+                <option value="">All Equipment (Overview)</option>
+                <option value="OC1.1">🛶 OC1.1</option>
+                <option value="OC1.2">🛶 OC1.2</option>
+                <option value="T1">🚣 T1</option>
+                <option value="T2">🚣 T2</option>
+                <option value="T3">🚣 T3</option>
+                <option value="T4">🚣 T4</option>
+                <option value="T5">🚣 T5</option>
+                <option value="K1">🛶 K1</option>
+                <option value="K2">🛶 K2</option>
+            </select>
+        </div>
+ 
+        <div class="legend">
+            <h3>📊 What the numbers mean:</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-badge" style="background-color: #FF6B4A; color: white;">3</div>
+                    <span>Number shows total bookings for that day</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 60px; height: 10px; background: linear-gradient(to right, #4CAF50, #FFC107, #F44336); border-radius: 5px; flex-shrink: 0;"></div>
+                    <span>Green = Available, Red = Busy</span>
+                </div>
+                <div class="legend-item">
+                    <span class="equipment-badge eq-oc1">OC1</span>
+                    <span class="equipment-badge eq-t">T</span>
+                    <span class="equipment-badge eq-k">K</span>
+                </div>
+            </div>
+        </div>
+ 
+        <div class="calendar-wrapper">
+            <table class="calendar" role="grid" aria-label="Booking calendar">
+                <thead>
+                    <tr>
+                        <th scope="col">MON</th>
+                        <th scope="col">TUE</th>
+                        <th scope="col">WED</th>
+                        <th scope="col">THU</th>
+                        <th scope="col">FRI</th>
+                        <th scope="col">SAT</th>
+                        <th scope="col">SUN</th>
+                    </tr>
+                </thead>
+                <tbody id="calendarBody">
+                    <!-- Calendar will be generated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+ 
+    <div id="bookingModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">🚣 Book Equipment</h2>
+                <button class="close" aria-label="Close booking form">&times;</button>
+            </div>
+            <div id="modalDate" class="modal-date"></div>
+ 
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="memberSelect">👤 Select Your Name (Members Only):</label>
+                    <select id="memberSelect" required aria-required="true">
+                        <option value="">-- Choose your name --</option>
+                    </select>
+                </div>
+ 
+                <div class="form-group">
+                    <label for="equipmentChoice">🚣 Select Equipment:</label>
+                    <select id="equipmentChoice" required aria-required="true">
+                        <option value="">Choose equipment...</option>
+                        <option value="OC1.1">🛶 OC1.1</option>
+                        <option value="OC1.2">🛶 OC1.2</option>
+                        <option value="T1">🚣 T1</option>
+                        <option value="T2">🚣 T2</option>
+                        <option value="T3">🚣 T3</option>
+                        <option value="T4">🚣 T4</option>
+                        <option value="T5">🚣 T5</option>
+                        <option value="K1">🛶 K1</option>
+                        <option value="K2">🛶 K2</option>
+                    </select>
+                </div>
+ 
+                <div class="form-group">
+                    <label>🕐 Choose Time Slot:</label>
+                    <div class="help-text" style="margin-top: 10px;">
+                        Tap a time slot below. ❌ means already taken.
+                    </div>
+                    <div id="timeSlots" class="time-slots" role="radiogroup" aria-label="Available time slots">
+                    </div>
+                </div>
+ 
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">✅ Confirm Booking</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBooking">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+    <script>
+        // Global variables
+        let currentMonth = 0; // January
+        let currentYear = 2026;
+        let selectedEquipment = '';
+        let members = [];
+ 
+        // Sample bookings
+        let bookings = [
+            {
+                id: 'B001',
+                equipmentId: 'OC1.1',
+                equipmentName: 'OC1.1',
+                memberName: 'Alice Johnson',
+                date: new Date(2026, 0, 9), // January 9, 2026
+                timeSlot: '09:00-10:00'
+            },
+            {
+                id: 'B002',
+                equipmentId: 'T1',
+                equipmentName: 'T1',
+                memberName: 'Bob Smith',
+                date: new Date(2026, 0, 9),
+                timeSlot: '14:00-15:00'
+            },
+            {
+                id: 'B003',
+                equipmentId: 'K1',
+                equipmentName: 'K1',
+                memberName: 'Charlie Brown',
+                date: new Date(2026, 0, 9),
+                timeSlot: '11:00-12:00'
+            }
+        ];
+ 
+        const timeSlots = [
+            '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00',
+            '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00',
+            '17:00-18:00'
+        ];
+ 
+        const equipmentColors = {
+            'OC1.1': 'eq-oc1',
+            'OC1.2': 'eq-oc1',
+            'T1': 'eq-t',
+            'T2': 'eq-t',
+            'T3': 'eq-t',
+            'T4': 'eq-t',
+            'T5': 'eq-t',
+            'K1': 'eq-k',
+            'K2': 'eq-k'
+        };
+ 
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded - initializing calendar...');
+            loadMembersFromStorage();
+            populateMemberDropdown();
+            setupEventListeners();
+            renderCalendar();
+            console.log('Initialization complete');
+        });
+ 
+        function loadMembersFromStorage() {
+            const storedMembers = localStorage.getItem('memberList');
+            if (storedMembers) {
+                try {
+                    members = JSON.parse(storedMembers);
+                    console.log('Loaded', members.length, 'members from storage');
+                } catch (e) {
+                    console.error('Error loading members:', e);
+                    members = ['Alice Johnson', 'Bob Smith', 'Charlie Brown'];
+                }
+            } else {
+                console.log('No members in storage, using defaults');
+                members = ['Alice Johnson', 'Bob Smith', 'Charlie Brown'];
+            }
+        }
+ 
+        function populateMemberDropdown() {
+            const memberSelect = document.getElementById('memberSelect');
+            memberSelect.innerHTML = '<option value="">-- Choose your name --</option>';
+           
+            const sortedMembers = [...members].sort((a, b) => a.localeCompare(b));
+           
+            sortedMembers.forEach(memberName => {
+                const option = document.createElement('option');
+                option.value = memberName;
+                option.textContent = memberName;
+                memberSelect.appendChild(option);
+            });
+           
+            console.log('Populated member dropdown with', sortedMembers.length, 'members');
+        }
+ 
+        function setupEventListeners() {
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            });
+ 
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            });
+ 
+            document.getElementById('equipmentSelect').addEventListener('change', (e) => {
+                selectedEquipment = e.target.value;
+                renderCalendar();
+            });
+ 
+            document.querySelector('.close').addEventListener('click', () => {
+                document.getElementById('bookingModal').style.display = 'none';
+            });
+ 
+            document.getElementById('cancelBooking').addEventListener('click', () => {
+                document.getElementById('bookingModal').style.display = 'none';
+            });
+ 
+            document.getElementById('bookingForm').addEventListener('submit', handleBookingSubmit);
+ 
+            window.addEventListener('click', (e) => {
+                if (e.target.id === 'bookingModal') {
+                    e.target.style.display = 'none';
+                }
+            });
+           
+            console.log('Event listeners setup complete');
+        }
+ 
+        function renderCalendar() {
+            console.log('Rendering calendar for:', currentMonth + 1, '/', currentYear);
+           
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+           
+            document.getElementById('currentMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+           
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+           
+            // Get the day of week (0 = Sunday, 1 = Monday, etc.)
+            const startingDayOfWeek = firstDay.getDay();
+            // Adjust so Monday = 0, Sunday = 6
+            const adjustedStart = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+           
+            console.log('First day of month:', firstDay);
+            console.log('Days in month:', daysInMonth);
+            console.log('Starting day (adjusted):', adjustedStart);
+           
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.innerHTML = '';
+           
+            let day = 1;
+            const totalCells = daysInMonth + adjustedStart;
+            const rows = Math.ceil(totalCells / 7);
+           
+            console.log('Creating', rows, 'rows');
+           
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('tr');
+               
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement('td');
+                    const cellIndex = i * 7 + j;
+                   
+                    if (cellIndex < adjustedStart || day > daysInMonth) {
+                        // Empty cell
+                        cell.classList.add('empty');
+                        cell.setAttribute('aria-hidden', 'true');
+                        cell.innerHTML = '&nbsp;';
+                    } else {
+                        // Date cell
+                        const currentDate = new Date(currentYear, currentMonth, day);
+                        cell.innerHTML = createDayCell(day, currentDate);
+                        cell.setAttribute('role', 'button');
+                        cell.setAttribute('tabindex', '0');
+                        cell.setAttribute('aria-label', `${monthNames[currentMonth]} ${day}, ${currentYear}. Tap to book.`);
+                       
+                        // Add click event
+                        (function(date) {
+                            cell.addEventListener('click', () => openBookingModal(date));
+                            cell.addEventListener('keypress', (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    openBookingModal(date);
+                                }
+                            });
+                        })(currentDate);
+                       
+                        day++;
+                    }
+                   
+                    row.appendChild(cell);
+                }
+               
+                calendarBody.appendChild(row);
+            }
+           
+            console.log('Calendar rendered with', day - 1, 'days');
+        }
+ 
+        function createDayCell(dayNumber, date) {
+            const dayBookings = getBookingsForDate(date);
+            const bookingCount = dayBookings.length;
+           
+            let html = `<div class="day-number">${dayNumber}</div>`;
+           
+            if (bookingCount > 0) {
+                html += `<div class="booking-count">${bookingCount}</div>`;
+            }
+           
+            if (dayNumber <= 3 && bookingCount === 0) {
+                html += `<div class="tap-hint">TAP HERE</div>`;
+            }
+           
+            if (bookingCount > 0) {
+                html += '<div class="booking-overview">';
+               
+                const uniqueEquipment = [...new Set(dayBookings.map(b => b.equipmentId))];
+                uniqueEquipment.forEach(eqId => {
+                    let eqName = eqId;
+                    if (eqId.startsWith('OC')) eqName = 'OC1';
+                    else if (eqId.startsWith('T')) eqName = 'T';
+                    else if (eqId.startsWith('K')) eqName = 'K';
+                   
+                    html += `<span class="equipment-badge ${equipmentColors[eqId]}">${eqName}</span>`;
+                });
+               
+                html += '</div>';
+               
+                const totalSlots = timeSlots.length * 9;
+                const bookedSlots = bookingCount;
+                const percentage = (bookedSlots / totalSlots) * 100;
+               
+                let barClass = 'avail-low';
+                if (percentage > 66) barClass = 'avail-high';
+                else if (percentage > 33) barClass = 'avail-medium';
+               
+                html += `
+                    <div class="availability-bar">
+                        <div class="availability-fill ${barClass}" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+            }
+           
+            return html;
+        }
+ 
+        function getBookingsForDate(date) {
+            return bookings.filter(booking => {
+                const match = booking.date.toDateString() === date.toDateString() &&
+                       (!selectedEquipment || booking.equipmentId === selectedEquipment);
+                return match;
+            });
+        }
+ 
+        function openBookingModal(date) {
+            const modal = document.getElementById('bookingModal');
+            const modalDate = document.getElementById('modalDate');
+           
+            modalDate.textContent = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+           
+            modal.dataset.selectedDate = date.toISOString();
+           
+            document.getElementById('bookingForm').reset();
+           
+            if (selectedEquipment) {
+                document.getElementById('equipmentChoice').value = selectedEquipment;
+                updateTimeSlots(date, selectedEquipment);
+            } else {
+                document.getElementById('equipmentChoice').value = '';
+                document.getElementById('timeSlots').innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Please select equipment first</p>';
+            }
+           
+            document.getElementById('equipmentChoice').onchange = function() {
+                updateTimeSlots(date, this.value);
+            };
+           
+            modal.style.display = 'block';
+            modal.scrollTop = 0;
+        }
+ 
+        function updateTimeSlots(date, equipmentId) {
+            const timeSlotsContainer = document.getElementById('timeSlots');
+           
+            if (!equipmentId) {
+                timeSlotsContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Please select equipment first</p>';
+                return;
+            }
+           
+            const dayBookings = bookings.filter(b =>
+                b.date.toDateString() === date.toDateString() &&
+                b.equipmentId === equipmentId
+            );
+           
+            const bookedSlots = dayBookings.map(b => b.timeSlot);
+           
+            timeSlotsContainer.innerHTML = '';
+           
+            timeSlots.forEach(slot => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'time-slot';
+                slotDiv.textContent = slot;
+                slotDiv.dataset.slot = slot;
+                slotDiv.setAttribute('role', 'radio');
+                slotDiv.setAttribute('tabindex', '0');
+               
+                if (bookedSlots.includes(slot)) {
+                    slotDiv.classList.add('booked');
+                    const booking = dayBookings.find(b => b.timeSlot === slot);
+                    slotDiv.setAttribute('aria-label', `${slot} - Already booked by ${booking.memberName}`);
+                    slotDiv.setAttribute('aria-disabled', 'true');
+                } else {
+                    slotDiv.setAttribute('aria-label', `${slot} - Available`);
+                    slotDiv.setAttribute('aria-checked', 'false');
+                   
+                    slotDiv.addEventListener('click', function() {
+                        document.querySelectorAll('.time-slot').forEach(s => {
+                            s.classList.remove('selected');
+                            s.setAttribute('aria-checked', 'false');
+                        });
+                        this.classList.add('selected');
+                        this.setAttribute('aria-checked', 'true');
+                    });
+                   
+                    slotDiv.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.click();
+                        }
+                    });
+                }
+               
+                timeSlotsContainer.appendChild(slotDiv);
+            });
+        }
+ 
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+           
+            const memberName = document.getElementById('memberSelect').value;
+            const equipmentId = document.getElementById('equipmentChoice').value;
+            const selectedSlot = document.querySelector('.time-slot.selected');
+           
+            if (!memberName) {
+                alert('⚠️ Please select your name from the member list');
+                return;
+            }
+           
+            if (!selectedSlot) {
+                alert('⚠️ Please select a time slot');
+                return;
+            }
+           
+            const timeSlot = selectedSlot.dataset.slot;
+            const dateStr = document.getElementById('bookingModal').dataset.selectedDate;
+            const date = new Date(dateStr);
+           
+            const equipmentName = document.getElementById('equipmentChoice').options[
+                document.getElementById('equipmentChoice').selectedIndex
+            ].text;
+           
+            const newBooking = {
+                id: 'B' + (bookings.length + 1).toString().padStart(3, '0'),
+                equipmentId: equipmentId,
+                equipmentName: equipmentName,
+                memberName: memberName,
+                date: date,
+                timeSlot: timeSlot
+            };
+           
+            bookings.push(newBooking);
+           
+            alert(`✅ BOOKING CONFIRMED!\n\n📅 Date: ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n🕐 Time: ${timeSlot}\n🚣 Equipment: ${equipmentName}\n👤 Name: ${memberName}\n🆔 Booking ID: ${newBooking.id}`);
+           
+            document.getElementById('bookingModal').style.display = 'none';
+            document.getElementById('bookingForm').reset();
+            renderCalendar();
+        }
+    </script>
+</body>
+</html>
+ 
